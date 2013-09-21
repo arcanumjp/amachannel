@@ -1,0 +1,141 @@
+
+<project name="XXXXXXX" default="forrelease" basedir="./">
+
+
+	<property name="prewardir"       value="./antbuild" />
+	<property name="WEB-INF.DIR"     value="${basedir}/WebContent/WEB-INF" />
+	<property name="jeepath"         value="../../../ide/pleiades/tomcat/7.0.42/lib" />
+	<property name="compilepath"     value="${prewardir}/WEB-INF/classes" />
+	<property name="webcontentpath"  value="./WebContent" />
+	<property name="confdir"         value="../releaseconfs" />
+
+
+	<!--
+
+		WEB-INF.DIR
+				WEB-INFへのパス
+
+
+		compilepath
+				コンパイルしたクラスが入る
+				./build
+		prewardir
+				war化する前の全部が入る
+				./antbuild
+
+		jeepath
+				servlet-api.jarのあるパス
+				../../ide/pleiades/tomcat/7.0/lib
+
+		libs
+				コンパイルの際に必要なライブラリのパス
+				./WebContent/WEB-INF/lib,
+				${jeepath}/servlet-api.jar
+
+
+	-->
+
+
+	<path id="libs">
+		<fileset dir="${WEB-INF.DIR}/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${jeepath}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="showconfs">
+
+		<echo>basedir     = ${basedir}</echo>
+		<echo>makedirname = ${makedirname} </echo>
+		<echo>webinfdir   = ${webinfdir} </echo>
+		<echo>j2eepath    = ${j2eepath} </echo>
+
+	</target>
+
+	<target name="clean">
+		<delete dir="${compilepath}"/>
+		<delete dir="${prewardir}"/>
+	</target>
+
+
+
+	<target name="forrelease">
+
+		<!-- 昔のコンパイルを削除 -->
+		<antcall target="clean" />
+
+		<!-- コンパイルしたクラスの受け入れ先を作成 -->
+		<mkdir dir="${prewardir}"/>
+		<mkdir dir="${compilepath}"/>
+
+		<javac 	srcdir="src"
+				destdir="${compilepath}"
+				encoding="UTF-8"
+				debug="on"
+				>
+			<!--
+			<compilerarg value="-Xlint:deprecation" />
+			-->
+			<compilerarg value="-Xlint:unchecked" />
+
+			<!-- TODO need commandline args -Xlint:unchecked -->
+		    <classpath refid="libs" />
+
+		</javac>
+
+		<!-- /WebContentの下をすべてコピーする。 -->
+		<copy todir="${prewardir}" >
+			<fileset dir="${webcontentpath}">
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
+
+		<!--
+			コンパイルしたクラスファイルをコピー
+				*  ./build に入ったコンパイルされたクラスファイル
+				*  ./src   に入ったソース一式
+		-->
+		<copy todir="${prewardir}/WEB-INF/classes" >
+			<!--
+			<fileset dir="${compilepath}">
+				<include name="**/*.*"/>
+			</fileset>
+			-->
+			<fileset dir="./src">
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
+
+		<!--
+			本番用のプロパティファイルなどのコピー
+		-->
+		<copy
+			file="${confdir}/context.xml"
+			tofile="${prewardir}/META-INF/context.xml"
+			overwrite="true"
+		/>
+
+		<copy
+			file="${confdir}/app.properties"
+			tofile="${prewardir}/WEB-INF/classes/app.properties"
+			overwrite="true"
+		/>
+
+		<copy
+			file="${confdir}/logback.xml"
+			tofile="${prewardir}/WEB-INF/classes/logback.xml"
+			overwrite="true"
+		/>
+
+		<!-- warファイル作る  -->
+		<war 	warfile="ROOT.war"
+				basedir="${prewardir}"
+		/>
+
+		<!-- 昔のコンパイルを削除 -->
+		<antcall target="clean" />
+	</target>
+
+</project>

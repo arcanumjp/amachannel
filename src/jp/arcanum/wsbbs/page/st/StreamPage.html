@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Bootstrap3テンプレート</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="twboot/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+		<!– IE8以前でもHTML5要素とメディアクエリをサポートするために、HTML5 shimとRespond.jsを読み込む –>
+		<!–[if lt IE 9]>
+		<!--
+		<script src="twboot/js/html5shiv.js"></script>
+		<script src="twboot/js/respond.min.js"></script>
+		 -->
+		<![endif]–>
+
+
+
+		<script>
+
+
+		var wsurl = 'ws://' + location.href.split('/')[2] + '/' + location.pathname.split('/')[1]  + '/wsstart';
+		var ws = new WebSocket(wsurl);
+
+			ws.onopen = function() {
+
+			};
+
+			// メッセージ受信時の処理
+			ws.onmessage = function(message) {
+
+				// '少々お待ちください'を削除
+				var $ama = $(".amachan");
+				var pleasewait = $ama.find('.pleasewait');
+				if(pleasewait != null){
+					pleasewait.hide();
+				}
+
+				// メッセージのパース
+				var statusxml = $(message.data);
+				var createat = statusxml.attr('createat');
+
+				var user  = statusxml.find('user');
+				var screenname = "@" + user.attr('screenname');
+				var iconurl    = user.attr('iconurl');
+				var tweet = statusxml.find('tweet').text();
+
+				var tweetandicon = "";
+				tweetandicon  = tweetandicon + "<div class='row'>";
+				tweetandicon  = tweetandicon + 		"<div class='col-md-1'>"
+				tweetandicon  = tweetandicon + 			"<img src='" + iconurl + "' />";
+				tweetandicon  = tweetandicon + 		"</div>"
+				tweetandicon  = tweetandicon + 		"<div class='col-md-11'>";
+				tweetandicon  = tweetandicon + 			tweet;
+				tweetandicon  = tweetandicon + 		"</div>";
+				tweetandicon  = tweetandicon + "</div>";
+
+				var $elem = $("<div class='col-md-12 well'>" + screenname + "(" + createat + ")" +  "<br>"  + tweetandicon + "</div>");
+				$elem.hide();
+				$ama.prepend($elem);
+				$elem.fadeIn();
+
+				// 画面上から不要なエレメントを削除
+				while($ama.find('.col-md-12').length > 10){
+					var $amacontents = $ama.find('.col-md-12');
+					$amacontents.get($amacontents.length - 1).remove();;
+				}
+
+			};
+
+
+
+			ws.onclose = function (closeEvent) {
+				alert('サーバーとの接続が切れたようです。再度このページをリロードしてください。');
+			};
+
+
+
+		    // 接続解除.
+		    function closeWs(){
+		    	ws.close();
+		    };
+
+		</script>
+
+
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="page-header">
+				<h1><a href="test">#あまちゃんねる </a><br><small>みんなの#あまちゃんタグ</small></h1>
+
+			</div>
+
+
+			<input type="submit" value="スタート" wicket:id="start" style="display: none;"/>
+
+
+			<div class="amachan">
+
+				<div class='row pleasewait'>;
+					<div class='col-md-12' style='text-align: center; font-size: x-large;'>
+						少々お待ちください・・・
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+
+
+
+		<!– jQuery (BootstrapのJavaScriptプラグインのために必要) –>
+	    <script src="//code.jquery.com/jquery.js"></script>
+		<script src="twboot/js/bootstrap.min.js"></script>
+		<script src="twboot/js/bootstrap.js"></script>
+	</body>
+</html>

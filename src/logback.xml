@@ -1,0 +1,28 @@
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Encoding>UTF-8</Encoding>
+		<File>c:/shiritori.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>c:/shiritori.%d{yyyyMMdd}.log</FileNamePattern>
+			<MaxHistory>2</MaxHistory>
+		</rollingPolicy>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>[%-5level][%d{yyyy-MM-dd HH:mm:ss}] %class - %msg%n</Pattern>
+		</layout>
+	</appender>
+
+
+	<logger name="jp.arcanum" level="DEBUG"/>
+
+	<root level="ERROR">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</root>
+
+</configuration>
